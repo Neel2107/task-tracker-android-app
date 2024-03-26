@@ -13,6 +13,9 @@ import { useColorScheme } from "@/components/useColorScheme";
 import TaskBoard from "./index";
 import { AppProvider } from "../context/AppContext";
 import { PaperProvider } from "react-native-paper";
+import { BottomSheetModalProvider } from "@gorhom/bottom-sheet";
+import { GestureHandlerRootView } from "react-native-gesture-handler";
+import { MenuProvider } from "react-native-popup-menu";
 
 export {
   // Catch any errors thrown by the Layout component.
@@ -56,13 +59,21 @@ function RootLayoutNav() {
 
   return (
     <ThemeProvider value={DefaultTheme}>
-      <PaperProvider>
+      <GestureHandlerRootView className="flex-1">
         <AppProvider>
-          <Stack>
-            <Stack.Screen name="index" options={{ headerShown: false }} />
-          </Stack>
+          <BottomSheetModalProvider>
+          <MenuProvider>
+
+        
+            <PaperProvider>
+              <Stack>
+                <Stack.Screen name="index" options={{ headerShown: false }} />
+              </Stack>
+            </PaperProvider>
+            </MenuProvider>
+          </BottomSheetModalProvider>
         </AppProvider>
-      </PaperProvider>
+      </GestureHandlerRootView>
     </ThemeProvider>
   );
 }

@@ -6,8 +6,17 @@ import {
   TextInput,
   StyleSheet,
   Button,
+  ScrollView,
+  TouchableOpacity,
+  FlatList,
 } from "react-native";
-import React, { useEffect, useState } from "react";
+import React, {
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
 import { StatusBar } from "expo-status-bar";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useAppContext } from "@/context/AppContext";
@@ -17,6 +26,11 @@ import { Dropdown } from "react-native-element-dropdown";
 import AntDesign from "@expo/vector-icons/AntDesign";
 import DatePicker from "react-native-date-picker";
 import NoTasks from "@/components/NoTasks";
+import { useRouter } from "expo-router";
+import Card from "@/components/Card";
+import { BottomSheetModal } from "@gorhom/bottom-sheet";
+import AddTask from "@/components/AddTaskModal";
+import { dropDownItems } from "@/utility/dropdownData";
 
 interface Task {
   assigneeName: string;
@@ -26,16 +40,9 @@ interface Task {
   status: string;
 }
 
-const data = [
-  { label: "Item 1", value: "1" },
-  { label: "Item 2", value: "2" },
-  { label: "Item 3", value: "3" },
-];
-
 const TaskBoard = () => {
   const insets = useSafeAreaInsets();
   const { tasks, setTasks } = useAppContext();
-  const [isAddModalOpen, setIsAddModalOpen] = useState(false);
   const [assigneeFilter, setAssigneeFilter] = useState("");
   const [priorityFilter, setPriorityFilter] = useState("All");
   const [sortPriority, setSortPriority] = useState("P0");
@@ -47,6 +54,7 @@ const TaskBoard = () => {
   const [isFocus1, setIsFocus1] = useState(false);
   const [date, setDate] = useState(new Date());
   const [open, setOpen] = useState(false);
+  const route = useRouter();
 
   useEffect(() => {
     const loadTasks = async () => {
@@ -59,12 +67,7 @@ const TaskBoard = () => {
 
     loadTasks();
   }, []);
-  const closeAddModal = async () => {
-    const result = await AsyncStorage.getItem("tasks");
-    const loadedTasks = result ? JSON.parse(result) : [];
-    setTasks(loadedTasks);
-    setIsAddModalOpen(false);
-  };
+ 
 
   const filteredTasks: Task[] = tasks.filter((task: Task) => {
     let startDate = new Date(task.startDate);
@@ -85,13 +88,13 @@ const TaskBoard = () => {
   });
 
   const sortedTasks: Task[] = filteredTasks.sort((a: Task, b: Task) => {
-    if (sortPriority === "P1") {
+    if (sortPriority === "p1") {
       if (a.priority === "P1") return -1;
       if (b.priority === "P1") return 1;
       if (a.priority === "P2") return 1;
       if (b.priority === "P2") return -1;
       return 0;
-    } else if (sortPriority === "P2") {
+    } else if (sortPriority === "p2") {
       return b.priority.localeCompare(a.priority);
     } else {
       return a.priority.localeCompare(b.priority);
@@ -107,8 +110,33 @@ const TaskBoard = () => {
     {}
   );
 
+  // ref
+  const bottomSheetModalRef = useRef<BottomSheetModal>(null);
+  // variables
+  const snapPoints = useMemo(() => ["25%", "50%"], []);
+
+  // callbacks
+  const handlePresentModalPress = useCallback(() => {
+    bottomSheetModalRef.current?.present();
+  }, []);
+  const handleSheetChanges = useCallback((index: number) => {
+    console.log("handleSheetChanges", index);
+  }, []);
+
+  const openAddTaskModal = () => {
+    bottomSheetModalRef.current?.present();
+  };
+  const closeAddTaskModal = () => {
+    bottomSheetModalRef.current?.dismiss();
+  };
+
+ 
+
   return (
-    <View className="flex-1 " style={{ paddingTop: insets.top }}>
+    <View className="flex-1" style={{ paddingTop: insets.top }}>
+      <BottomSheetModal ref={bottomSheetModalRef} snapPoints={["75%"]}>
+        <AddTask closeAddTaskModal={closeAddTaskModal} />
+      </BottomSheetModal>
       <StatusBar style="dark" />
       <View className="flex flex-col space-y-4 p-4">
         <View className="flex flex-row items-center justify-between">
@@ -122,9 +150,20 @@ const TaskBoard = () => {
 
         <View className="flex flex-col  space-y-4 justify-between ">
           <View className="flex flex-row justify-end">
-            <TouchableRipple className=" px-4 rounded-lg py-2 bg-blue-500">
+            <TouchableOpacity
+              onPress={openAddTaskModal}
+              className=" px-4 rounded-lg py-2 bg-blue-500"
+            >
               <View>
                 <Text className=" text-lg text-white">Add Task</Text>
+              </View>
+            </TouchableOpacity>
+            <TouchableRipple
+              onPress={async () => await AsyncStorage.clear()}
+              className=" px-4 rounded-lg py-2 bg-red-500 ml-4"
+            >
+              <View>
+                <Text className=" text-lg text-white">Clear Data</Text>
               </View>
             </TouchableRipple>
           </View>
@@ -147,7 +186,7 @@ const TaskBoard = () => {
                 selectedTextStyle={styles.selectedTextStyle}
                 inputSearchStyle={styles.inputSearchStyle}
                 iconStyle={styles.iconStyle}
-                data={data}
+                data={dropDownItems}
                 maxHeight={300}
                 labelField="label"
                 valueField="value"
@@ -187,10 +226,10 @@ const TaskBoard = () => {
                 selectedTextStyle={styles.selectedTextStyle}
                 inputSearchStyle={styles.inputSearchStyle}
                 iconStyle={styles.iconStyle}
-                data={data}
+                data={dropDownItems}
                 maxHeight={300}
                 labelField="label"
-                valueField="value"
+                valueField="key"
                 placeholder={!isFocus1 ? "Priority" : "..."}
                 value={sortPriority}
                 onFocus={() => setIsFocus1(true)}
@@ -203,15 +242,23 @@ const TaskBoard = () => {
             </View>
           </View>
 
-          {isLoading
-            ? Array.from({ length: 5 }).map((_, index) =>  <Text key={index}>Loading</Text>)
-            : Object.entries(tasksByStatus).length === 0
-            ? <NoTasks />
-            : Object.entries(tasksByStatus).map(([status, tasks]) => (
-                <View className="" key={status}>
-                  <Card statusID={status} tasks={tasks} />
-                </View>
-              ))}
+          {isLoading ? (
+            Array.from({ length: 5 }).map((_, index) => (
+              <Text key={index}>Loading</Text>
+            ))
+          ) : Object.entries(tasksByStatus).length === 0 ? (
+            <NoTasks />
+          ) : (
+            <FlatList
+              data={Object.entries(tasksByStatus)}
+              horizontal
+              contentContainerStyle={{ flexGrow: 1 }}
+              keyExtractor={([status, tasks]) => status}
+              renderItem={({ item: [status, tasks] }) => (
+                <Card statusID={status} tasks={tasks} />
+              )}
+            />
+          )}
         </View>
       </View>
     </View>
