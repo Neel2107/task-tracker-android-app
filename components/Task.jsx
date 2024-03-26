@@ -1,4 +1,4 @@
-import { View, Text, TouchableOpacity } from "react-native";
+import { View, Text, TouchableOpacity, Modal } from "react-native";
 import React from "react";
 import { useState } from "react";
 import {
@@ -8,6 +8,7 @@ import {
   MenuTrigger,
 } from "react-native-popup-menu";
 import { Entypo } from "@expo/vector-icons";
+import EditTaskModal from "./EditTaskModal";
 
 const Task = ({
   title,
@@ -42,6 +43,16 @@ const Task = ({
 
   return (
     <View className="my-2 space-y-2 bg-zinc-300 rounded-md p-2">
+      <EditTaskModal   taskToEdit={{
+          title,
+          priority,
+          assignee,
+          description,
+          status,
+          id,
+          statusID,
+          team
+        }} isOpen={isEditModalOpen} closeEditModal={closeEditModal}/>
       <View className="flex flex-row items-center justify-between border-b pb-2 border-zinc-500">
         <Text className="text-lg font-medium">{title}</Text>
         <View className="p-2 rounded-md bg-blue-500">
@@ -67,7 +78,7 @@ const Task = ({
           >
             <MenuOption
               onSelect={() => {
-                console.log("Edit");
+                setIsEditModalOpen(true);
               }}
               text="Edit"
               customStyles={{

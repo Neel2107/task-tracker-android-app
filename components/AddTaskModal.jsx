@@ -86,7 +86,7 @@ const AddTask = ({closeAddTaskModal}) => {
           
         />
         <TextInput
-          className={`border rounded-md border-gray-300 rounded p-2 mb-4 ${
+          className={`border rounded-md border-gray-300  p-2 mb-4 ${
             descriptionError ? "bg-red-200" : "bg-white"
           }`}
           placeholder="Description"
