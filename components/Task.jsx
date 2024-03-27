@@ -43,7 +43,7 @@ const Task = ({
   };
 
   return (
-    <View className="my-2 space-y-2 bg-zinc-300 rounded-md p-2">
+    <View className="my-2 space-y-2 bg-zinc-200 rounded-md p-2">
       <EditTaskModal
         taskToEdit={{
           title,

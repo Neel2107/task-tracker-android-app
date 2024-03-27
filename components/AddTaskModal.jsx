@@ -1,9 +1,8 @@
-import { View, Text, Button, TouchableOpacity } from "react-native";
+import { View, Text, Button, TouchableOpacity, ToastAndroid } from "react-native";
 import React, { useState } from "react";
 import { TextInput } from "react-native-paper";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { Dropdown } from "react-native-element-dropdown";
-import { v4 as uuidv4 } from 'uuid';
 import { useAppContext } from "@/context/AppContext";
 
 const generateUniqueId = () => {
@@ -58,6 +57,8 @@ const AddTask = ({closeAddTaskModal}) => {
     try {
       await AsyncStorage.setItem("tasks", JSON.stringify(tasks));
       setTasks(tasks); // Update tasks in context
+      ToastAndroid.show("Task added!", ToastAndroid.SHORT);
+
       closeAddTaskModal();
     } catch (e) {
       console.error("Error saving tasks to AsyncStorage:", e);
