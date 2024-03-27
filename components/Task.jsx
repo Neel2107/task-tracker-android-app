@@ -9,6 +9,7 @@ import {
 } from "react-native-popup-menu";
 import { Entypo } from "@expo/vector-icons";
 import EditTaskModal from "./EditTaskModal";
+import DeleteTaskModal from "./DeleteTaskModal";
 
 const Task = ({
   title,
@@ -22,14 +23,14 @@ const Task = ({
 }) => {
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
-  const [popoverKey, setPopoverKey] = useState(Math.random());
+
 
   const openDeleteModal = () => {
-    setPopoverKey(Math.random());
+   
     setIsDeleteModalOpen(true);
   };
   const openEditModal = () => {
-    setPopoverKey(Math.random());
+   
     setIsEditModalOpen(true);
   };
 
@@ -43,7 +44,8 @@ const Task = ({
 
   return (
     <View className="my-2 space-y-2 bg-zinc-300 rounded-md p-2">
-      <EditTaskModal   taskToEdit={{
+      <EditTaskModal
+        taskToEdit={{
           title,
           priority,
           assignee,
@@ -51,8 +53,25 @@ const Task = ({
           status,
           id,
           statusID,
-          team
-        }} isOpen={isEditModalOpen} closeEditModal={closeEditModal}/>
+          team,
+        }}
+        isOpen={isEditModalOpen}
+        closeEditModal={closeEditModal}
+      />
+
+      <DeleteTaskModal
+        isOpen={isDeleteModalOpen}
+        onClose={closeDeleteModal}
+        taskToDelete={{
+          title,
+          priority,
+          assignee,
+          description,
+          status,
+          id,
+          statusID,
+        }}
+      />
       <View className="flex flex-row items-center justify-between border-b pb-2 border-zinc-500">
         <Text className="text-lg font-medium">{title}</Text>
         <View className="p-2 rounded-md bg-blue-500">
@@ -85,21 +104,24 @@ const Task = ({
                 optionText: { color: "black", fontSize: 15 },
               }}
             />
-            <MenuOption>
+            <MenuOption  onSelect={openDeleteModal}>
               <Text style={{ color: "red" }}>Delete</Text>
             </MenuOption>
           </MenuOptions>
         </Menu>
       </View>
       <View className=" flex flex-col  rounded-md">
+        
+
         <TouchableOpacity
           activeOpacity={1}
-          className="  flex items-center justify-center w-20 py-2 px-4 bg-blue-500 text-white   rounded-md"
-        >
+          className="  flex items-center justify-center w-28 py-2 px-4 bg-blue-500 text-white   rounded-md"
+          >
           <Text className="text-white font-semibold">
             {Number(statusID) === 1 ? "Assign" : status}
           </Text>
         </TouchableOpacity>
+      
       </View>
     </View>
   );

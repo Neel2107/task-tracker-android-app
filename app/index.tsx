@@ -9,6 +9,7 @@ import {
   ScrollView,
   TouchableOpacity,
   FlatList,
+  RefreshControl,
 } from "react-native";
 import React, {
   useCallback,
@@ -55,18 +56,9 @@ const TaskBoard = () => {
   const [date, setDate] = useState(new Date());
   const [open, setOpen] = useState(false);
   const route = useRouter();
+  const [isRefreshing, setIsRefreshing] = useState(false); // State to track refreshing
 
-  useEffect(() => {
-    const loadTasks = async () => {
-      const result = await AsyncStorage.getItem("tasks");
-      const loadedTasks = result ? JSON.parse(result) : [];
-      setTasks(loadedTasks);
-      setPriorityFilter("All");
-      setIsLoading(false);
-    };
 
-    loadTasks();
-  }, []);
  
 
   const filteredTasks: Task[] = tasks.filter((task: Task) => {
@@ -94,7 +86,7 @@ const TaskBoard = () => {
       if (a.priority === "P2") return 1;
       if (b.priority === "P2") return -1;
       return 0;
-    } else if (sortPriority === "p2") {
+    } else if (sortPriority == "P2") {
       return b.priority.localeCompare(a.priority);
     } else {
       return a.priority.localeCompare(b.priority);
@@ -115,13 +107,7 @@ const TaskBoard = () => {
   // variables
   const snapPoints = useMemo(() => ["25%", "50%"], []);
 
-  // callbacks
-  const handlePresentModalPress = useCallback(() => {
-    bottomSheetModalRef.current?.present();
-  }, []);
-  const handleSheetChanges = useCallback((index: number) => {
-    console.log("handleSheetChanges", index);
-  }, []);
+  
 
   const openAddTaskModal = () => {
     bottomSheetModalRef.current?.present();
@@ -130,14 +116,44 @@ const TaskBoard = () => {
     bottomSheetModalRef.current?.dismiss();
   };
 
+
+  const loadTasks = async () => {
+    const result = await AsyncStorage.getItem("tasks");
+    const loadedTasks = result ? JSON.parse(result) : [];
+    setTasks(loadedTasks);
+    setPriorityFilter("All");
+    setIsLoading(false);
+  };
+
+  const onRefresh = useCallback(async () => {
+    setIsRefreshing(true);
+    // Perform your data fetching here
+    // For example, reload tasks
+    await loadTasks();
+    setIsRefreshing(false); // Reset refreshing state
+  }, [loadTasks]); // Make sure to include necessary dependencies here
+  useEffect(() => {
+
+    loadTasks();
+  }, []);
+ 
  
 
   return (
     <View className="flex-1" style={{ paddingTop: insets.top }}>
+     
       <BottomSheetModal ref={bottomSheetModalRef} snapPoints={["75%"]}>
         <AddTask closeAddTaskModal={closeAddTaskModal} />
       </BottomSheetModal>
       <StatusBar style="dark" />
+      <ScrollView  refreshControl={
+  <RefreshControl
+  refreshing={isRefreshing}
+  onRefresh={onRefresh}
+/>
+      }>
+
+  
       <View className="flex flex-col space-y-4 p-4">
         <View className="flex flex-row items-center justify-between">
           <Text className="text-2xl font-bold ">Task Board</Text>
@@ -261,6 +277,7 @@ const TaskBoard = () => {
           )}
         </View>
       </View>
+      </ScrollView>
     </View>
   );
 };

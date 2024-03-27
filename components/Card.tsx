@@ -10,7 +10,7 @@ const Card = ({ statusID, tasks }) => {
   return (
     <View className="flex  flex-col rounded-md w-full  bg-white">
       <View
-        className={`flex w-full  items-center justify-center py-2 text-white rounded-t-md font-semibold bg-zinc-500`}
+        className={`flex w-full  items-center justify-center py-2 rounded-t-md    ${color}  `}
       >
         <Text className="text-xl font-semibold text-white"> {text}</Text>
       </View>
