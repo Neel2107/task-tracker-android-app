@@ -141,12 +141,12 @@ const EditTaskModal = ({ isOpen, closeEditModal, taskToEdit }) => {
                   maxHeight={300}
                   labelField="label"
                   valueField="key"
-                  placeholder={!isFocus1 ? "Priority" : "..."}
+                  placeholder={!isFocus1 ? taskToEdit.priority : "..."}
                   value={selectedPriority}
                   onFocus={() => setIsFocus1(true)}
                   onBlur={() => setIsFocus1(false)}
                   onChange={(item) => {
-                    setSelectedPriority(item.key);
+                    setSelectedPriority(item.label);
                     setIsFocus1(false);
                   }}
                 />

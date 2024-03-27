@@ -1,14 +1,14 @@
 export  const dropDownItems = [
     {
-      key: "P0",
+      key: "p0",
       label: "P0",
     },
     {
-      key: "P1",
+      key: "p1",
       label: "P1",
     },
     {
-      key: "P2",
+      key: "p2",
       label: "P2",
     },
   ];

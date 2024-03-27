@@ -3,8 +3,16 @@ import React, { useState } from "react";
 import { TextInput } from "react-native-paper";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { Dropdown } from "react-native-element-dropdown";
+import { v4 as uuidv4 } from 'uuid';
+import { useAppContext } from "@/context/AppContext";
+
+const generateUniqueId = () => {
+  // Create a unique ID based on the current time and a random number
+  return 'id-' + new Date().getTime().toString(36) + '-' + Math.random().toString(36).substr(2, 9);
+};
 
 const AddTask = ({closeAddTaskModal}) => {
+  const { tasks, setTasks } = useAppContext();
   const [selectedPriority, setSelectedPriority] = useState("Priority");
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
@@ -31,10 +39,12 @@ const AddTask = ({closeAddTaskModal}) => {
         tasks = JSON.parse(value);
       }
     } catch (e) {
-      // error reading value
+      console.error("Error reading tasks from AsyncStorage:", e);
+      return; // Exit if reading fails
     }
 
     const newTask = {
+      id: generateUniqueId(), // Use the custom function here
       title,
       description,
       team,
@@ -47,9 +57,10 @@ const AddTask = ({closeAddTaskModal}) => {
 
     try {
       await AsyncStorage.setItem("tasks", JSON.stringify(tasks));
+      setTasks(tasks); // Update tasks in context
       closeAddTaskModal();
     } catch (e) {
-      // saving error
+      console.error("Error saving tasks to AsyncStorage:", e);
     }
 
     resetForm();
@@ -66,7 +77,7 @@ const AddTask = ({closeAddTaskModal}) => {
   return (
     <View className={`flex-1 justify-center items-center`}>
       <View className={`h-full flex-1  w-full p-4 `}>
-        <Text className={`text-lg font-bold mb-4`}>CREATE A TASK</Text>
+        <Text className={`text-xl font-bold mb-4`}>CREATE A TASK</Text>
         <TextInput
           className={`border rounded-md border-gray-300   p-2 mb-4 ${
             titleError ? "bg-red-200" : "bg-white"
@@ -104,7 +115,7 @@ const AddTask = ({closeAddTaskModal}) => {
           underlineColorAndroid={"transparent"}
         />
         <TextInput
-          className={`border rounded-md border-gray-300 rounded p-2 mb-4 ${
+          className={`border rounded-md border-gray-300  p-2 mb-4 ${
             teamError ? "bg-red-200" : "bg-white"
           }`}
           placeholder="Team"
@@ -121,7 +132,7 @@ const AddTask = ({closeAddTaskModal}) => {
           underlineColorAndroid={"transparent"}
         />
         <TextInput
-          className={`border rounded-md border-gray-300 rounded p-2 mb-4 ${
+          className={`border rounded-md border-gray-300  p-2 mb-4 ${
             assigneeNameError ? "bg-red-200" : "bg-white"
           }`}
           placeholder="Assignee Name"
