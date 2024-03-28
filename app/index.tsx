@@ -33,7 +33,12 @@ import { BottomSheetModal } from "@gorhom/bottom-sheet";
 import AddTask from "@/components/AddTaskModal";
 import { dropDownItems } from "@/utility/dropdownData";
 import { Entypo } from "@expo/vector-icons";
-import { Menu, MenuOption, MenuOptions, MenuTrigger } from "react-native-popup-menu";
+import {
+  Menu,
+  MenuOption,
+  MenuOptions,
+  MenuTrigger,
+} from "react-native-popup-menu";
 
 interface Task {
   assigneeName: string;
@@ -115,7 +120,6 @@ const TaskBoard = () => {
   // ref
   const bottomSheetModalRef = useRef<BottomSheetModal>(null);
   // variables
-  const snapPoints = useMemo(() => ["25%", "50%"], []);
 
   const openAddTaskModal = () => {
     bottomSheetModalRef.current?.present();
@@ -190,7 +194,7 @@ const TaskBoard = () => {
           />
         )}
         ref={bottomSheetModalRef}
-        snapPoints={["75%"]}
+        snapPoints={["75%", "100%"]}
       >
         <AddTask closeAddTaskModal={closeAddTaskModal} />
       </BottomSheetModal>
@@ -215,22 +219,24 @@ const TaskBoard = () => {
               </MenuTrigger>
 
               <MenuOptions
-            optionsContainerStyle={{
-              backgroundColor: "white",
-              padding: 5,
-              borderRadius: 10,
-              marginTop: 45,
-            }}
-          >
-            <MenuOption
-              onSelect={async () => await AsyncStorage.clear()}
-              text="Clear Data"
-              customStyles={{
-                optionText: { color: "black", fontSize: 15 },
-              }}
-            />
-           
-          </MenuOptions>
+                optionsContainerStyle={{
+                  backgroundColor: "white",
+                  padding: 5,
+                  borderRadius: 10,
+                  marginTop: 45,
+                }}
+              >
+                <MenuOption
+                onSelect={async () => {
+                  await AsyncStorage.clear();
+                  await loadTasks();
+                }}
+                  text="Clear Data"
+                  customStyles={{
+                    optionText: { color: "black", fontSize: 15 },
+                  }}
+                />
+              </MenuOptions>
             </Menu>
           </View>
 
@@ -308,6 +314,7 @@ const TaskBoard = () => {
                 {showStartDatePicker && (
                   <DatePicker
                     modal
+                    theme="auto"
                     open={showStartDatePicker}
                     date={selectedStartDate || new Date()}
                     onConfirm={(date) => {
@@ -324,6 +331,8 @@ const TaskBoard = () => {
                 {showEndDatePicker && (
                   <DatePicker
                     modal
+                    theme="auto"
+                    
                     open={showEndDatePicker}
                     date={selectedEndDate || new Date()}
                     onConfirm={(date) => {

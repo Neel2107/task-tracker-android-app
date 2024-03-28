@@ -1,4 +1,10 @@
-import { View, Text, Button, TouchableOpacity, ToastAndroid } from "react-native";
+import {
+  View,
+  Text,
+  Button,
+  TouchableOpacity,
+  ToastAndroid,
+} from "react-native";
 import React, { useState } from "react";
 import { TextInput } from "react-native-paper";
 import AsyncStorage from "@react-native-async-storage/async-storage";
@@ -7,10 +13,21 @@ import { useAppContext } from "@/context/AppContext";
 
 const generateUniqueId = () => {
   // Create a unique ID based on the current time and a random number
-  return 'id-' + new Date().getTime().toString(36) + '-' + Math.random().toString(36).substr(2, 9);
+  return (
+    "id-" +
+    new Date().getTime().toString(36) +
+    "-" +
+    Math.random().toString(36).substr(2, 9)
+  );
 };
+const data = [
+  { label: "Priority", value: "Priority" },
+  { label: "P0", value: "P0" },
+  { label: "P1", value: "P1" },
+  { label: "P2", value: "P2" },
+];
 
-const AddTask = ({closeAddTaskModal}) => {
+const AddTask = ({ closeAddTaskModal }) => {
   const { tasks, setTasks } = useAppContext();
   const [selectedPriority, setSelectedPriority] = useState("Priority");
   const [title, setTitle] = useState("");
@@ -22,15 +39,49 @@ const AddTask = ({closeAddTaskModal}) => {
   const [teamError, setTeamError] = useState(false);
   const [assigneeNameError, setAssigneeNameError] = useState(false);
 
-  const data = [
-    { label: "Priority", value: "Priority" },
-    { label: "P0", value: "P0" },
-    { label: "P1", value: "P1" },
-    { label: "P2", value: "P2" },
-    
-  ];
+  const validateForm = () => {
+    // Check if required fields are not empty and meet character requirements
+    if (!title || title.length < 3) {
+      return "title";
+    }
+    if (!description || description.length < 10) {
+      return "description";
+    }
+    if (!team) {
+      return "team";
+    }
+    if (!assigneeName) {
+      return "assigneeName";
+    }
+
+    // Return true if no errors
+    return true;
+  };
 
   const handleSubmit = async () => {
+    const validationResult = validateForm();
+
+    if (validationResult !== true) {
+      let toastMessage = "";
+      switch (validationResult) {
+        case "title":
+          toastMessage =
+            "Title is required and should be at least 3 characters long.";
+          break;
+        case "description":
+          toastMessage =
+            "Description is required and should be at least 10 characters long.";
+          break;
+        case "team":
+          toastMessage = "Team is required.";
+          break;
+        case "assigneeName":
+          toastMessage = "Assignee Name is required.";
+          break;
+      }
+      ToastAndroid.show(toastMessage, ToastAndroid.SHORT);
+      return; // Prevent form submission if validation fails
+    }
     let tasks = [];
     try {
       const value = await AsyncStorage.getItem("tasks");
@@ -67,6 +118,7 @@ const AddTask = ({closeAddTaskModal}) => {
     resetForm();
   };
 
+  // This function resets the form fields to their initial state
   const resetForm = () => {
     setSelectedPriority("Priority");
     setTitle("");
@@ -87,15 +139,12 @@ const AddTask = ({closeAddTaskModal}) => {
           value={title}
           onChangeText={setTitle}
           cursorColor="#000"
-         
           style={{ fontSize: 14, color: "#000", height: 30 }}
           placeholderTextColor={"#000"}
-       
           textColor="black"
           activeUnderlineColor="#000"
           underlineColor="transparent"
           underlineColorAndroid={"transparent"}
-          
         />
         <TextInput
           className={`border rounded-md border-gray-300  p-2 mb-4 ${
@@ -105,11 +154,10 @@ const AddTask = ({closeAddTaskModal}) => {
           value={description}
           onChangeText={setDescription}
           multiline
+          numberOfLines={1} // Initial number of lines
           cursorColor="#000"
-         
-          style={{ fontSize: 14, color: "#000", height: 30 }}
+          style={{ fontSize: 14, color: "#000" }}
           placeholderTextColor={"#000"}
-       
           textColor="black"
           activeUnderlineColor="#000"
           underlineColor="transparent"
@@ -123,10 +171,8 @@ const AddTask = ({closeAddTaskModal}) => {
           value={team}
           onChangeText={setTeam}
           cursorColor="#000"
-         
           style={{ fontSize: 14, color: "#000", height: 30 }}
           placeholderTextColor={"#000"}
-       
           textColor="black"
           activeUnderlineColor="#000"
           underlineColor="transparent"
@@ -140,33 +186,39 @@ const AddTask = ({closeAddTaskModal}) => {
           value={assigneeName}
           onChangeText={setAssigneeName}
           cursorColor="#000"
-         
           style={{ fontSize: 14, color: "#000", height: 30 }}
           placeholderTextColor={"#000"}
-       
           textColor="black"
           activeUnderlineColor="#000"
           underlineColor="transparent"
           underlineColorAndroid={"transparent"}
         />
         <View>
-
-        <Dropdown
-        className="border border-gray-300 px-5 py-2  rounded-md"
-          style={{ width: "100%", height: 40, marginBottom: 20 , fontSize: 14}}
-          data={data}
-          placeholder="Select priority"
-          placeholderStyle={{ color: "black",fontSize: 14 }}
-          valueField="value"
-          labelField="label"
-          value={selectedPriority}
-          onChange={(item) => setSelectedPriority(item.value)}
+          <Dropdown
+            className="border border-gray-300 px-5 py-2  rounded-md"
+            style={{
+              width: "100%",
+              height: 40,
+              marginBottom: 20,
+              fontSize: 14,
+            }}
+            data={data}
+            placeholder="Select priority"
+            placeholderStyle={{ color: "black", fontSize: 14 }}
+            valueField="value"
+            labelField="label"
+            value={selectedPriority}
+            onChange={(item) => setSelectedPriority(item.value)}
           />
-          </View>
-
-        <TouchableOpacity className="flex items-center py-2 justify-center  rounded-md  bg-blue-500" onPress={handleSubmit} >
-          <Text className={`   text-white `}>Add</Text>
-        </TouchableOpacity>
+        </View>
+        <View className="flex items-center justify-center">
+          <TouchableOpacity
+            className="flex items-center py-2 px-10 justify-center  rounded-lg  bg-blue-500"
+            onPress={handleSubmit}
+          >
+            <Text className={`  text-lg  text-white `}>ADD</Text>
+          </TouchableOpacity>
+        </View>
       </View>
     </View>
   );

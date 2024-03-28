@@ -2,6 +2,7 @@ import { View, Text, ScrollView } from "react-native";
 import React from "react";
 import Task from "./Task";
 import { FlatList } from "react-native";
+import Animated, { FadeInUp, FadeOutDown } from "react-native-reanimated";
 
 export const statusMap = {
   1: { text: "Pending", color: "#9CA3AF" }, // bg-zinc-400
@@ -15,7 +16,7 @@ const Card = ({ statusID, tasks }) => {
   const { text, color } = statusMap[statusID] || {};
 
   return (
-    <View className="flex  flex-col rounded-md w-[300px] m-2  bg-white">
+    <Animated.View entering={FadeInUp} exiting={FadeOutDown} className="flex  flex-col rounded-md w-[300px] m-2  bg-white">
       <View
         className={`flex w-full  items-center justify-center py-2 rounded-t-md     `}
 
@@ -43,7 +44,7 @@ const Card = ({ statusID, tasks }) => {
           />
         </View>
    
-    </View>
+    </Animated.View>
   );
 };
 

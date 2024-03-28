@@ -10,6 +10,7 @@ import {
 import { Entypo } from "@expo/vector-icons";
 import EditTaskModal from "./EditTaskModal";
 import DeleteTaskModal from "./DeleteTaskModal";
+import Animated, { FadeInUp, FadeOutDown } from "react-native-reanimated";
 
 const Task = ({
   title,
@@ -43,7 +44,7 @@ const Task = ({
   };
 
   return (
-    <View className="my-2 space-y-2 bg-zinc-200 rounded-md p-2">
+    <Animated.View entering={FadeInUp} exiting={FadeOutDown} className="my-2 space-y-2 bg-zinc-200 rounded-md p-2">
       <EditTaskModal
         taskToEdit={{
           title,
@@ -123,7 +124,7 @@ const Task = ({
         </TouchableOpacity>
       
       </View>
-    </View>
+    </Animated.View>
   );
 };
 
